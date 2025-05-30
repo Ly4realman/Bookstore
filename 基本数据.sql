@@ -6,9 +6,13 @@ USE bookstore;
 CREATE TABLE user (
                       id INT PRIMARY KEY AUTO_INCREMENT,
                       username VARCHAR(50) NOT NULL UNIQUE,
-                      password VARCHAR(50) NOT NULL,
-                      email VARCHAR(100)
+                      password VARCHAR(255) NOT NULL,
+                      phone VARCHAR(20),
+                      email VARCHAR(100),
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
 
 -- 图书表
 CREATE TABLE book (
@@ -31,4 +35,5 @@ INSERT INTO book (title, author, price, stock, description) VALUES
                                                                 ('Effective Java', 'Joshua Bloch', 98.00, 35, 'Java最佳实践和规范的权威指南'),
                                                                 ('Spring实战', 'Craig Walls', 88.00, 22, '全面介绍Spring框架的实用指南'),
                                                                 ('机器学习实战', 'Peter Harrington', 92.00, 28, '用Python实现机器学习算法的实用指南');
+
 

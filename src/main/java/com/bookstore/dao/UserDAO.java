@@ -3,33 +3,49 @@ package com.bookstore.dao;
 import com.bookstore.bean.User;
 import com.bookstore.util.DBUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 
 public class UserDAO {
 
-    /* 根据用户名和密码验证用户*/
-    public User login(String username, String password) {
-        User user = null;
-        String sql = "SELECT * FROM user WHERE username = ? AND password = ?";
+    public User findByUsername(String username) {
+        String sql = "SELECT * FROM user WHERE username = ?";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ps.setString(1, username);
-            ps.setString(2, password);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
 
-            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                user = new User();
+                User user = new User();
                 user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
-                user.setEmail(rs.getString("email"));
                 user.setPassword(rs.getString("password"));
+                user.setPhone(rs.getString("phone"));  // 新增
+                user.setEmail(rs.getString("email"));  // 如果email依然保留
+                return user;
             }
         } catch (Exception e) {
-            e.printStackTrace(); // 可替换为日志系统
+            e.printStackTrace();
         }
-        return user;
+        return null;
     }
+
+    public boolean register(User user) {
+        String sql = "INSERT INTO user (username, password, phone) VALUES (?, ?, ?)";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getPassword());
+            stmt.setString(3, user.getPhone());
+
+            return stmt.executeUpdate() == 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
 }

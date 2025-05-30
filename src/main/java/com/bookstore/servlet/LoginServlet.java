@@ -4,11 +4,9 @@ import com.bookstore.bean.User;
 import com.bookstore.dao.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 
@@ -21,18 +19,50 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
+
         String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String password = request.getParameter("password").trim();
+        String inputCaptcha = request.getParameter("captcha");
 
-        User user = userDAO.login(username, password);
+        HttpSession session = request.getSession();
+        String sessionCaptcha = (String) session.getAttribute("captcha");
 
-        if (user != null) {
-            // 登录成功：保存用户信息，跳转主页
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
+        // 验证验证码
+        if (sessionCaptcha == null || !sessionCaptcha.equals(inputCaptcha)) {
+            request.setAttribute("error", "验证码错误");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+
+        // 查找用户并比对密码哈希
+        User user = userDAO.findByUsername(username);
+
+        System.out.println("输入密码: " + password);
+        System.out.println("数据库密码哈希: " + user.getPassword());
+        System.out.println("比对结果: " + BCrypt.checkpw(password, user.getPassword()));
+        for (char c : password.toCharArray()) {
+            System.out.print((int)c + " ");
+        }
+        System.out.println();
+        System.out.println("数据库密码哈希长度: " + user.getPassword().length());
+        System.out.println("数据库密码哈希原文: [" + user.getPassword() + "]");
+
+
+        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
+            // 清除旧 session，创建新 session（防 session fixation）
+            session.invalidate();
+            HttpSession newSession = request.getSession(true);
+            newSession.setAttribute("user", user);
+            newSession.setMaxInactiveInterval(30 * 60); // 30分钟过期
+
+            // 设置 cookie 安全属性
+            Cookie cookie = new Cookie("JSESSIONID", newSession.getId());
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true); // 仅在 HTTPS 启用时设置
+            response.addCookie(cookie);
+
             response.sendRedirect("index.jsp");
         } else {
-            // 登录失败：返回登录页并提示
             request.setAttribute("error", "用户名或密码错误");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
