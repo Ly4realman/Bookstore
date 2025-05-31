@@ -36,4 +36,11 @@ INSERT INTO book (title, author, price, stock, description) VALUES
                                                                 ('Spring实战', 'Craig Walls', 88.00, 22, '全面介绍Spring框架的实用指南'),
                                                                 ('机器学习实战', 'Peter Harrington', 92.00, 28, '用Python实现机器学习算法的实用指南');
 
+CREATE TABLE admin (
+                       id INT PRIMARY KEY AUTO_INCREMENT,
+                       username VARCHAR(50) NOT NULL UNIQUE,
+                       password VARCHAR(100) NOT NULL
+);
+INSERT INTO admin (username, password) VALUES
+    ('admin', '$2a$10$wF2ZrC9hZJ9u9c6UHd92PuzX9PKXYe0zVZldqIsg7pUgG73VZzqvK'); -- 密码：admin123A
 
