@@ -42,5 +42,9 @@ CREATE TABLE admin (
                        password VARCHAR(100) NOT NULL
 );
 INSERT INTO admin (username, password) VALUES
-    ('admin', '$2a$10$wF2ZrC9hZJ9u9c6UHd92PuzX9PKXYe0zVZldqIsg7pUgG73VZzqvK'); -- 密码：admin123A
+    ('admin123', '$2a$10$Kn3tFLV/jQZKooY1BMfmwuw2RESkHIlFwvXmp9Teek4YpYFq/87zm'); -- 密码：admin123A
 
+ALTER TABLE book
+    ADD COLUMN cover_image VARCHAR(255),   -- 存封面图的路径，如 "/images/book1.jpg"
+    ADD COLUMN is_hot BOOLEAN DEFAULT 0,   -- 是否热门
+    ADD COLUMN sales INT DEFAULT 0;        -- 销量
