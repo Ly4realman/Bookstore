@@ -9,6 +9,10 @@ public class Book {
     private BigDecimal price;
     private int stock;
     private String description;
+    private String coverImage;
+
+
+
 
     public int getId() {
         return id;
@@ -56,5 +60,13 @@ public class Book {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
     }
 }

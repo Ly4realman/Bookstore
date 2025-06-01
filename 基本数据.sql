@@ -48,3 +48,7 @@ ALTER TABLE book
     ADD COLUMN cover_image VARCHAR(255),   -- 存封面图的路径，如 "/images/book1.jpg"
     ADD COLUMN is_hot BOOLEAN DEFAULT 0,   -- 是否热门
     ADD COLUMN sales INT DEFAULT 0;        -- 销量
+
+
+UPDATE book SET is_hot = 1, cover_image = 'images/book1.jpg' WHERE id = 1;
+UPDATE book SET is_hot = 1, cover_image = 'images/book2.jpg' WHERE id = 2;
