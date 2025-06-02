@@ -1,11 +1,14 @@
 package com.bookstore.bean;
 
+import java.sql.Timestamp;
+
 public class User {
     private int id;
     private String username;
     private String password;
     private String phone;
     private String email;
+    private Timestamp createdAt;
 
     public String getUsername() {
         return username;
@@ -45,5 +48,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
