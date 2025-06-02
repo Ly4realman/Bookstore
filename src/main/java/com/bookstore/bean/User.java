@@ -5,7 +5,8 @@ public class User {
     private String username;
     private String password;
     private String phone;
-    private String email;
+    private String real_name;
+    private String address;
 
     public String getUsername() {
         return username;
@@ -39,11 +40,11 @@ public class User {
         this.phone = phone;
     }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getReal_name() { return real_name; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public void setReal_name(String real_name) { this.real_name = real_name; }
+
+    public String getAddress() { return address; }
+
+    public void setAddress(String address) { this.address = address; }
 }

@@ -20,8 +20,7 @@ public class UserDAO {
                 user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
-                user.setPhone(rs.getString("phone"));  // 新增
-                user.setEmail(rs.getString("email"));  // 如果email依然保留
+                user.setPhone(rs.getString("phone"));
                 return user;
             }
         } catch (Exception e) {

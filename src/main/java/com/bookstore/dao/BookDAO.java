@@ -23,6 +23,7 @@ public class BookDAO {
                 book.setAuthor(rs.getString("author"));
                 book.setPrice(rs.getBigDecimal("price"));
                 book.setStock(rs.getInt("stock"));
+                book.setCoverImage(rs.getString("cover_image"));
                 book.setDescription(rs.getString("description"));
                 books.add(book);
             }

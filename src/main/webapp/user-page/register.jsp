@@ -26,7 +26,7 @@
 <div class="register-container">
     <h3 class="text-center mb-4">用户注册</h3>
 
-    <form action="register" method="post">
+    <form action="/user/register" method="post">
         <div class="mb-3">
             <label for="username" class="form-label">用户名</label>
             <input type="text" class="form-control" id="username" name="username" required>

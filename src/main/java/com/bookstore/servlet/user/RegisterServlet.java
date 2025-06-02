@@ -1,4 +1,4 @@
-package com.bookstore.servlet;
+package com.bookstore.servlet.user;
 
 import com.bookstore.bean.User;
 import com.bookstore.dao.UserDAO;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/register")
+@WebServlet("/user/register")
 public class RegisterServlet extends HttpServlet {
     private final UserDAO userDAO = new UserDAO();
 
@@ -52,7 +52,7 @@ public class RegisterServlet extends HttpServlet {
         // 4. 如果有错误，回显并终止
         if (!errors.isEmpty()) {
             request.setAttribute("errors", errors);
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("/user-page/register.jsp").forward(request, response);
             return;
         }
 
@@ -66,11 +66,11 @@ public class RegisterServlet extends HttpServlet {
         boolean success = userDAO.register(newUser);
         
         if (success) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("/user-page/login.jsp");
         } else {
             errors.add("注册失败，请稍后重试");
             request.setAttribute("errors", errors);
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("/user-page/register.jsp").forward(request, response);
         }
     }
 
