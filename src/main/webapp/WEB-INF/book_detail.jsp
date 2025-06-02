@@ -6,7 +6,13 @@
     <meta charset="UTF-8">
     <title>${book.title} - 图书详情</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/header.css">
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
         .book-detail-section {
             background-color: #fff;
             border-radius: 8px;
@@ -63,64 +69,64 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index">首页</a></li>
-                <li class="breadcrumb-item active" aria-current="page">图书详情</li>
-            </ol>
-        </nav>
+<jsp:include page="/WEB-INF/components/header.jsp"/>
 
-        <!-- 基本信息部分 -->
-        <div class="book-detail-section">
-            <div class="row">
-                <!-- 图书封面 -->
-                <div class="col-md-4">
-                    <img src="${book.coverImage}" class="img-fluid book-cover" alt="${book.title}">
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index">首页</a></li>
+            <li class="breadcrumb-item active" aria-current="page">图书详情</li>
+        </ol>
+    </nav>
+
+    <!-- 基本信息部分 -->
+    <div class="book-detail-section">
+        <div class="row">
+            <!-- 图书封面 -->
+            <div class="col-md-4">
+                <img src="${book.coverImage}" class="img-fluid book-cover" alt="${book.title}">
+            </div>
+            
+            <!-- 图书信息 -->
+            <div class="col-md-8">
+                <h2 class="mb-4">${book.title}</h2>
+                <p class="text-muted h5 mb-3">作者：${book.author}</p>
+                <p class="price mb-4">￥${book.price}</p>
+                <p class="stock-info mb-4">
+                    <i class="bi bi-check-circle-fill"></i> 
+                    库存：${book.stock} 件
+                </p>
+                <div class="description mb-4">
+                    <h5 class="mb-3">图书简介</h5>
+                    <p class="text-muted">${book.description}</p>
                 </div>
                 
-                <!-- 图书信息 -->
-                <div class="col-md-8">
-                    <h2 class="mb-4">${book.title}</h2>
-                    <p class="text-muted h5 mb-3">作者：${book.author}</p>
-                    <p class="price mb-4">￥${book.price}</p>
-                    <p class="stock-info mb-4">
-                        <i class="bi bi-check-circle-fill"></i> 
-                        库存：${book.stock} 件
-                    </p>
-                    <div class="description mb-4">
-                        <h5 class="mb-3">图书简介</h5>
-                        <p class="text-muted">${book.description}</p>
-                    </div>
-                    
-                    <div class="d-grid gap-2 d-md-block">
-                        <form action="${pageContext.request.contextPath}/cart/add" method="post" class="d-inline">
-                            <input type="hidden" name="bookId" value="${book.id}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn btn-primary btn-lg me-2">加入购物车</button>
-                        </form>
-                        <button class="btn btn-danger btn-lg" type="button" 
-                                onclick="location.href='${pageContext.request.contextPath}/checkout?bookId=${book.id}'">
-                            立即购买
-                        </button>
-                    </div>
+                <div class="d-grid gap-2 d-md-block">
+                    <form action="${pageContext.request.contextPath}/cart/add" method="post" class="d-inline">
+                        <input type="hidden" name="bookId" value="${book.id}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary btn-lg me-2">加入购物车</button>
+                    </form>
+                    <button class="btn btn-danger btn-lg" type="button" 
+                            onclick="location.href='${pageContext.request.contextPath}/checkout?bookId=${book.id}'">
+                        立即购买
+                    </button>
                 </div>
             </div>
         </div>
-
-        <!-- 推荐内容区域 -->
-        <c:if test="${not empty book.recommendation}">
-            <div class="recommendation-section">
-                <h4 class="recommendation-title">编辑推荐</h4>
-                <div class="recommendation-content">
-                    ${book.recommendation}
-                </div>
-            </div>
-        </c:if>
     </div>
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 推荐内容区域 -->
+    <c:if test="${not empty book.recommendation}">
+        <div class="recommendation-section">
+            <h4 class="recommendation-title">编辑推荐</h4>
+            <div class="recommendation-content">
+                ${book.recommendation}
+            </div>
+        </div>
+    </c:if>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

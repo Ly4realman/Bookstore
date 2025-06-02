@@ -7,6 +7,7 @@
     <title>书店首页</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/header.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -80,130 +81,10 @@
             color: #dc3545;
             font-weight: bold;
         }
-
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .navbar.sticky-top {
-            position: sticky;
-            top: 0;
-            z-index: 1020;
-        }
-
-        .navbar .user-welcome {
-            color: #007bff;
-            font-weight: 500;
-        }
-
-        .navbar .dropdown-menu {
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 8px 0;
-        }
-
-        .navbar .dropdown-item {
-            padding: 8px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #333;
-        }
-
-        .navbar .dropdown-item:hover {
-            background-color: #f8f9fa;
-            color: #007bff;
-        }
-
-        .search-input {
-            border-radius: 25px;
-            padding: 12px 25px;
-            font-size: 1.1em;
-            border: 1px solid #333;
-            background-color: rgba(255,255,255,0.95);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
     </style>
 </head>
 <body>
-<!-- 导航栏 -->
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
-    <div class="container">
-        <a class="navbar-brand" href="index">
-            <i class="bi bi-book"></i> 糊涂书店
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- 搜索框 -->
-            <div class="w-100 d-flex justify-content-center mb-3">
-                <form class="d-flex w-100 justify-content-center" action="search" method="get" style="max-width: 600px; min-width: 250px;">
-                    <div class="input-group w-100">
-                        <input type="text" name="query" class="form-control search-input"
-                               placeholder="搜索图书、作者..." required>
-                        <button type="submit" class="btn btn-outline-primary">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- 用户菜单 -->
-            <ul class="navbar-nav ms-auto">
-                <c:choose>
-                    <c:when test="${empty sessionScope.user}">
-                        <li class="nav-item">
-                            <a class="nav-link" href="login.jsp">登录</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="register.jsp">注册</a>
-                        </li>
-                    </c:when>
-                    <c:otherwise>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle user-welcome" href="#" id="userDropdown" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle"></i>
-                                欢迎，${sessionScope.user.username}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li>
-                                    <a class="dropdown-item" href="profile">
-                                        <i class="bi bi-person"></i> 个人信息
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="orders">
-                                        <i class="bi bi-receipt"></i> 我的订单
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item position-relative" href="cart">
-                                        <i class="bi bi-cart3"></i> 购物车
-                                        <c:if test="${not empty cartItemCount}">
-                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                    ${cartItemCount}
-                                            </span>
-                                        </c:if>
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="logout">
-                                        <i class="bi bi-box-arrow-right"></i> 退出登录
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </c:otherwise>
-                </c:choose>
-            </ul>
-        </div>
-    </div>
-</nav>
+<jsp:include page="/WEB-INF/components/header.jsp"/>
 
 <div class="container">
     <!-- 热门图书轮播 -->
