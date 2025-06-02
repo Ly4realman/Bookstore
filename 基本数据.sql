@@ -47,8 +47,27 @@ INSERT INTO admin (username, password) VALUES
 ALTER TABLE book
     ADD COLUMN cover_image VARCHAR(255),   -- 存封面图的路径，如 "/images/book1.jpg"
     ADD COLUMN is_hot BOOLEAN DEFAULT 0,   -- 是否热门
-    ADD COLUMN sales INT DEFAULT 0;        -- 销量
+    ADD COLUMN sales INT DEFAULT 0,        -- 销量
+    ADD COLUMN recommendation TEXT;        -- 图书推荐内容
 
 
 UPDATE book SET is_hot = 1, cover_image = 'images/book1.jpg' WHERE id = 1;
 UPDATE book SET is_hot = 1, cover_image = 'images/book2.jpg' WHERE id = 2;
+
+-- 购物车表
+CREATE TABLE cart (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
+
+-- 购物车项表
+CREATE TABLE cart_item (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cart_id INT NOT NULL,
+    book_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (cart_id) REFERENCES cart(id),
+    FOREIGN KEY (book_id) REFERENCES book(id)
+);

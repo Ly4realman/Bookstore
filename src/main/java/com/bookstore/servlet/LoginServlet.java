@@ -34,20 +34,8 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // 查找用户并比对密码哈希
+
         User user = userDAO.findByUsername(username);
-
-        System.out.println("输入密码: " + password);
-        System.out.println("数据库密码哈希: " + user.getPassword());
-        System.out.println("比对结果: " + BCrypt.checkpw(password, user.getPassword()));
-        for (char c : password.toCharArray()) {
-            System.out.print((int)c + " ");
-        }
-        System.out.println();
-        System.out.println("数据库密码哈希长度: " + user.getPassword().length());
-        System.out.println("数据库密码哈希原文: [" + user.getPassword() + "]");
-
-
         if (user != null && BCrypt.checkpw(password, user.getPassword())) {
             // 清除旧 session，创建新 session（防 session fixation）
             session.invalidate();
@@ -61,7 +49,7 @@ public class LoginServlet extends HttpServlet {
             cookie.setSecure(true); // 仅在 HTTPS 启用时设置
             response.addCookie(cookie);
 
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("index");
         } else {
             request.setAttribute("error", "用户名或密码错误");
             request.getRequestDispatcher("login.jsp").forward(request, response);

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.bookstore.bean.Book" %>
 <%@ page import="java.util.List" %>
 <html>
@@ -37,6 +37,6 @@
     %>
 </table>
 
-<p><a href="index.jsp">返回主页</a></p>
+<p><a href="index">返回主页</a></p>
 </body>
 </html>

@@ -66,7 +66,8 @@ public class BookDAO {
         book.setPrice(rs.getBigDecimal("price"));
         book.setStock(rs.getInt("stock"));
         book.setDescription(rs.getString("description"));
-        book.setCoverImage(rs.getString("cover_image")); // 如果你有这个字段
+        book.setCoverImage(rs.getString("cover_image"));
+        book.setRecommendation(rs.getString("recommendation"));
         return book;
     }
 
@@ -91,5 +92,21 @@ public class BookDAO {
         return list;
     }
 
+    public Book getBookById(int id) {
+        String sql = "SELECT * FROM book WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToBook(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }

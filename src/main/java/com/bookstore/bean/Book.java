@@ -10,6 +10,7 @@ public class Book {
     private int stock;
     private String description;
     private String coverImage;
+    private String recommendation;
 
 
 
@@ -68,5 +69,13 @@ public class Book {
 
     public void setCoverImage(String coverImage) {
         this.coverImage = coverImage;
+    }
+
+    public String getRecommendation() {
+        return recommendation;
+    }
+
+    public void setRecommendation(String recommendation) {
+        this.recommendation = recommendation;
     }
 }
