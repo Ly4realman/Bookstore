@@ -22,11 +22,11 @@ public class BookDAO {
                 book.setTitle(rs.getString("title"));
                 book.setAuthor(rs.getString("author"));
                 book.setPrice(rs.getBigDecimal("price"));
+                book.setCoverImage(rs.getString("cover_image"));
                 book.setStock(rs.getInt("stock"));
                 book.setDescription(rs.getString("description"));
                 books.add(book);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
