@@ -29,10 +29,10 @@
                 <c:choose>
                     <c:when test="${empty sessionScope.user}">
                         <li class="nav-item">
-                            <a class="nav-link" href="login.jsp">登录</a>
+                            <a class="nav-link" href="/user-page/login.jsp">登录</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="register.jsp">注册</a>
+                            <a class="nav-link" href="/user-page/register.jsp">注册</a>
                         </li>
                     </c:when>
                     <c:otherwise>
@@ -65,7 +65,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger" href="logout">
+                                    <a class="dropdown-item text-danger" href="/user/logout">
                                         <i class="bi bi-box-arrow-right"></i> 退出登录
                                     </a>
                                 </li>

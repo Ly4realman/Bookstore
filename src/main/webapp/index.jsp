@@ -86,6 +86,7 @@
 <body>
 <jsp:include page="/WEB-INF/components/header.jsp"/>
 
+
 <div class="container">
     <!-- 热门图书轮播 -->
     <div class="section-container">
@@ -114,6 +115,7 @@
             </button>
         </div>
     </div>
+
 
     <!-- 图书列表 -->
     <div class="section-container">

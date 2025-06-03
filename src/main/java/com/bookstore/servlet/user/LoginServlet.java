@@ -1,4 +1,4 @@
-package com.bookstore.servlet;
+package com.bookstore.servlet.user;
 
 import com.bookstore.bean.User;
 import com.bookstore.dao.UserDAO;
@@ -10,7 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 
-@WebServlet("/login")
+@WebServlet("/user/login")
 public class LoginServlet extends HttpServlet {
     private final UserDAO userDAO = new UserDAO();
 
@@ -30,7 +30,7 @@ public class LoginServlet extends HttpServlet {
         // 验证验证码
         if (sessionCaptcha == null || !sessionCaptcha.equals(inputCaptcha)) {
             request.setAttribute("error", "验证码错误");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("/user-page/login.jsp").forward(request, response);
             return;
         }
 
@@ -49,10 +49,10 @@ public class LoginServlet extends HttpServlet {
             cookie.setSecure(true); // 仅在 HTTPS 启用时设置
             response.addCookie(cookie);
 
-            response.sendRedirect("index");
+            response.sendRedirect("/index");
         } else {
             request.setAttribute("error", "用户名或密码错误");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("/user-page/login.jsp").forward(request, response);
         }
     }
 }

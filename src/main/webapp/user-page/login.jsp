@@ -30,7 +30,7 @@
 
 <div class="login-container">
   <h3 class="text-center mb-4">用户登录</h3>
-  <form action="login" method="post">
+  <form action="/user/login" method="post">
     <div class="mb-3">
       <label for="username" class="form-label">用户名</label>
       <input type="text" class="form-control" id="username" name="username" required>
@@ -45,7 +45,7 @@
       <label for="captcha" class="form-label">验证码</label>
       <div class="d-flex">
         <input type="text" class="form-control me-2" id="captcha" name="captcha" required>
-        <img src="captcha" alt="验证码" class="captcha-img"
+        <img src="/captcha" alt="验证码" class="captcha-img"
              onclick="this.src='captcha?'+Math.random()" title="看不清？点击刷新">
       </div>
     </div>
