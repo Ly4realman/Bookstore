@@ -26,6 +26,7 @@ public class RegisterServlet extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
         String phone = request.getParameter("phone");
+        String email = request.getParameter("email");
 
         List<String> errors = new ArrayList<>();
 
@@ -49,19 +50,26 @@ public class RegisterServlet extends HttpServlet {
             errors.add("手机号格式不正确");
         }
 
-        // 4. 如果有错误，回显并终止
+        // 4. 邮箱格式校验
+        if (email == null || !email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+            errors.add("邮箱格式不正确");
+        }
+
+
+        // 5. 如果有错误，回显并终止
         if (!errors.isEmpty()) {
             request.setAttribute("errors", errors);
             request.getRequestDispatcher("/user-page/register.jsp").forward(request, response);
             return;
         }
 
-        // 5. 全部验证通过，保存用户（调用 register 方法）
+        // 6. 全部验证通过，保存用户（调用 register 方法）
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setPassword(hashedPassword);
         newUser.setPhone(phone);
+        newUser.setEmail(email);
 
         boolean success = userDAO.register(newUser);
         

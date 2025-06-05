@@ -4,7 +4,7 @@
 <!-- 导航栏 -->
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="index">
+        <a class="navbar-brand" href="/index">
             <i class="bi bi-book"></i> 糊涂书店
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -44,7 +44,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="profile">
+                                    <a class="dropdown-item" href="/user/profile">
                                         <i class="bi bi-person"></i> 个人信息
                                     </a>
                                 </li>
@@ -54,7 +54,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item position-relative" href="cart">
+                                    <a class="dropdown-item position-relative" href="/cart">
                                         <i class="bi bi-cart3"></i> 购物车
                                         <c:if test="${not empty cartItemCount}">
                                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">

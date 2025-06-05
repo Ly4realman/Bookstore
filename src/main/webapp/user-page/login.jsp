@@ -6,6 +6,8 @@
   <meta charset="UTF-8">
   <!-- 引入 Bootstrap 5 CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/header.css">
   <style>
     body {
       background-color: #f8f9fa;
@@ -27,6 +29,7 @@
   </style>
 </head>
 <body>
+<jsp:include page="/WEB-INF/components/header.jsp"/>
 
 <div class="login-container">
   <h3 class="text-center mb-4">用户登录</h3>

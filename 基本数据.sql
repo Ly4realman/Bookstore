@@ -8,6 +8,9 @@ CREATE TABLE user (
                       username VARCHAR(50) NOT NULL UNIQUE,
                       password VARCHAR(255) NOT NULL,
                       phone VARCHAR(20),
+                      email VARCHAR(100),
+                      realname VARCHAR(50),
+                      address VARCHAR(255),
                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -70,3 +73,4 @@ CREATE TABLE cart_item (
     FOREIGN KEY (cart_id) REFERENCES cart(id),
     FOREIGN KEY (book_id) REFERENCES book(id)
 );
+

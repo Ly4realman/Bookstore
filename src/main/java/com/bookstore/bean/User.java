@@ -1,12 +1,16 @@
 package com.bookstore.bean;
 
+import java.sql.Timestamp;
+
 public class User {
     private int id;
     private String username;
     private String password;
     private String phone;
-    private String real_name;
+    private String realname;
     private String address;
+    private String email;
+    private Timestamp createdAt;
 
     public String getUsername() {
         return username;
@@ -40,11 +44,19 @@ public class User {
         this.phone = phone;
     }
 
-    public String getReal_name() { return real_name; }
+    public String getRealname() { return realname; }
 
-    public void setReal_name(String real_name) { this.real_name = real_name; }
+    public void setRealname(String realname) { this.realname = realname; }
 
     public String getAddress() { return address; }
 
     public void setAddress(String address) { this.address = address; }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
+
+    public Timestamp getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 }

@@ -7,6 +7,9 @@
     <title>用户注册</title>
     <!-- 引入 Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/header.css">
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -22,6 +25,7 @@
     </style>
 </head>
 <body>
+<jsp:include page="/WEB-INF/components/header.jsp"/>
 
 <div class="register-container">
     <h3 class="text-center mb-4">用户注册</h3>
@@ -46,6 +50,12 @@
             <label for="phone" class="form-label">手机号</label>
             <input type="text" class="form-control" id="phone" name="phone" required>
         </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">邮箱</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+
 
         <c:if test="${not empty errors}">
             <div class="alert alert-danger">

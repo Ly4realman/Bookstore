@@ -11,6 +11,8 @@ public class Book {
     private String description;
     private String coverImage;
     private String recommendation;
+    private Boolean isHot;
+    private Integer sales;
 
 
 
@@ -78,4 +80,19 @@ public class Book {
     public void setRecommendation(String recommendation) {
         this.recommendation = recommendation;
     }
+
+    public Boolean getHot() {
+        return isHot;
+    }
+
+    public void setHot(Boolean hot) {isHot = hot;}
+
+    public Integer getSales() {
+        return sales;
+    }
+
+    public void setSales(Integer sales) {
+        this.sales = sales;
+    }
+
 }
