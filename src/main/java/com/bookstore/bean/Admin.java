@@ -5,7 +5,6 @@ public class Admin {
     private String username;
     private String password;
 
-    // getter 和 setter
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

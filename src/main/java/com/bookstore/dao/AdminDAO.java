@@ -2,6 +2,8 @@ package com.bookstore.dao;
 
 import com.bookstore.bean.Admin;
 import com.bookstore.util.DBUtil;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.sql.*;
 
 public class AdminDAO {
@@ -23,4 +25,16 @@ public class AdminDAO {
         }
         return null;
     }
+
+    public boolean validateLogin(String username, String password) {
+        Admin admin = findByUsername(username);
+        if (admin != null) {
+            // 验证密码是否匹配（使用BCrypt）
+            boolean matches = BCrypt.checkpw(password, admin.getPassword());
+            System.out.println("Password validation result: " + matches); // 调试日志
+            return matches;
+        }
+        return false;
+    }
+
 }
