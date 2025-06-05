@@ -25,7 +25,7 @@ public class AdminLoginServlet extends HttpServlet {
             System.out.println("Login successful for user: " + username); // 调试日志
             HttpSession session = request.getSession();
             session.setAttribute("adminUsername", username);
-            response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         } else {
             System.out.println("Login failed for user: " + username); // 调试日志
             request.setAttribute("error", "用户名或密码错误");
