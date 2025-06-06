@@ -142,7 +142,7 @@
 <!-- 页脚 -->
 <footer class="bg-light py-4 mt-5">
     <div class="container text-center text-muted">
-        <p>&copy; 2024 我的书店. All rights reserved.</p>
+        <p>&copy; 2025 糊涂书店. All rights reserved.</p>
     </div>
 </footer>
 

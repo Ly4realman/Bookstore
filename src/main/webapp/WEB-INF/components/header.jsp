@@ -49,7 +49,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="orders">
+                                    <a class="dropdown-item" href="${pageContext.request.contextPath}/order/list">
                                         <i class="bi bi-receipt"></i> 我的订单
                                     </a>
                                 </li>

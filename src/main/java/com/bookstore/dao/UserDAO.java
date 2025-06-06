@@ -172,15 +172,92 @@ public class UserDAO {
     }
 
     public boolean deleteUser(int userId) {
-        String sql = "DELETE FROM user WHERE id = ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false); // 开启事务
 
-            stmt.setInt(1, userId);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+            // 1. 检查是否存在购物车项目
+            String checkCartSql = "SELECT COUNT(*) FROM cart_item WHERE user_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(checkCartSql)) {
+                stmt.setInt(1, userId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // 存在购物车项目，先删除
+                    String deleteCartSql = "DELETE FROM cart_item WHERE user_id = ?";
+                    try (PreparedStatement deleteStmt = conn.prepareStatement(deleteCartSql)) {
+                        deleteStmt.setInt(1, userId);
+                        int deleted = deleteStmt.executeUpdate();
+                        System.out.println("Deleted " + deleted + " cart items");
+                    }
+                }
+            }
+
+            // 2. 检查并删除订单项
+            String checkOrdersSql = "SELECT id FROM orders WHERE user_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(checkOrdersSql)) {
+                stmt.setInt(1, userId);
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    int orderId = rs.getInt("id");
+                    // 删除订单项
+                    String deleteOrderItemsSql = "DELETE FROM order_items WHERE order_id = ?";
+                    try (PreparedStatement deleteStmt = conn.prepareStatement(deleteOrderItemsSql)) {
+                        deleteStmt.setInt(1, orderId);
+                        int deleted = deleteStmt.executeUpdate();
+                        System.out.println("Deleted " + deleted + " order items for order " + orderId);
+                    }
+                }
+            }
+
+            // 3. 删除订单
+            String deleteOrdersSql = "DELETE FROM orders WHERE user_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteOrdersSql)) {
+                stmt.setInt(1, userId);
+                int deleted = stmt.executeUpdate();
+                System.out.println("Deleted " + deleted + " orders");
+            }
+
+            // 4. 最后删除用户
+            String deleteUserSql = "DELETE FROM user WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteUserSql)) {
+                stmt.setInt(1, userId);
+                int result = stmt.executeUpdate();
+                System.out.println("User deletion result: " + result);
+
+                if (result > 0) {
+                    conn.commit();
+                    return true;
+                }
+            }
+
+            conn.rollback();
             return false;
+
+        } catch (SQLException e) {
+            System.out.println("Error occurred while deleting user:");
+            System.out.println("SQL State: " + e.getSQLState());
+            System.out.println("Error Code: " + e.getErrorCode());
+            System.out.println("Message: " + e.getMessage());
+            e.printStackTrace();
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

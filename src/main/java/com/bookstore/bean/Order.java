@@ -5,40 +5,34 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class Order {
-    private Integer orderId;
-    private Integer userId;
-    private String username;
+    private int id;
+    private int userId;
     private BigDecimal totalAmount;
     private String status;
+    private String shippingAddress;
+    private String receiverName;
+    private String receiverPhone;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-    private List<OrderItem> items;
+    private List<OrderItem> orderItems;
 
     public Order() {
     }
 
-    public Integer getOrderId() {
-        return orderId;
+    public int getId() {
+        return id;
     }
 
-    public void setOrderId(Integer orderId) {
-        this.orderId = orderId;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public Integer getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public BigDecimal getTotalAmount() {
@@ -57,6 +51,30 @@ public class Order {
         this.status = status;
     }
 
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
+
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
+
+    public String getReceiverPhone() {
+        return receiverPhone;
+    }
+
+    public void setReceiverPhone(String receiverPhone) {
+        this.receiverPhone = receiverPhone;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -73,11 +91,12 @@ public class Order {
         this.updatedAt = updatedAt;
     }
 
-    public List<OrderItem> getItems() {
-        return items;
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
     }
 
-    public void setItems(List<OrderItem> items) {
-        this.items = items;
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
     }
+
 }

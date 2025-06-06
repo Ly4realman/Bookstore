@@ -66,7 +66,7 @@
                 </ul>
             </div>
         </c:if>
-        <p>已有账号？<a href="login.jsp">点击登录</a></p>
+        <p>已有账号？<a href="/user-page/login.jsp">点击登录</a></p>
         <div class="d-grid">
             <button type="submit" class="btn btn-success">注册</button>
         </div>

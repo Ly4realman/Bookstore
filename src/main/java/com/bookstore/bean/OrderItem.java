@@ -3,53 +3,45 @@ package com.bookstore.bean;
 import java.math.BigDecimal;
 
 public class OrderItem {
-    private Integer itemId;
-    private Integer orderId;
-    private Integer bookId;
-    private String bookTitle;
-    private Integer quantity;
+    private int id;
+    private int orderId;
+    private int bookId;
+    private int quantity;
     private BigDecimal price;
+    private Book book; // 关联的图书信息
 
     public OrderItem() {
     }
 
-    public Integer getItemId() {
-        return itemId;
+    public int getId() {
+        return id;
     }
 
-    public void setItemId(Integer itemId) {
-        this.itemId = itemId;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public Integer getOrderId() {
+    public int getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Integer orderId) {
+    public void setOrderId(int orderId) {
         this.orderId = orderId;
     }
 
-    public Integer getBookId() {
+    public int getBookId() {
         return bookId;
     }
 
-    public void setBookId(Integer bookId) {
+    public void setBookId(int bookId) {
         this.bookId = bookId;
     }
 
-    public String getBookTitle() {
-        return bookTitle;
-    }
-
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
-    }
-
-    public Integer getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 
@@ -59,5 +51,13 @@ public class OrderItem {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
     }
 }

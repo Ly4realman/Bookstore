@@ -1,5 +1,6 @@
 package com.bookstore.servlet.admin;
 
+import com.bookstore.bean.Book;
 import com.bookstore.bean.Order;
 import com.bookstore.bean.OrderItem;
 import com.bookstore.util.DBUtil;
@@ -21,13 +22,19 @@ public class AdminOrderServlet extends HttpServlet {
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
-        if (pathInfo == null || pathInfo.equals("/")) {
-            // List all orders
-            listOrders(request, response);
-        } else {
-            // View order details
-            int orderId = Integer.parseInt(pathInfo.substring(1));
-            getOrderDetails(request, response, orderId);
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                // List all orders
+                listOrders(request, response);
+            } else {
+                // View order details
+                int orderId = Integer.parseInt(pathInfo.substring(1));
+                getOrderDetails(request, response, orderId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Database error occurred");
+            request.getRequestDispatcher("/admin/error.jsp").forward(request, response);
         }
     }
 
@@ -36,14 +43,20 @@ public class AdminOrderServlet extends HttpServlet {
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
-        if (pathInfo != null && pathInfo.equals("/update-status")) {
-            // Update order status
-            updateOrderStatus(request, response);
+        try {
+            if (pathInfo != null && pathInfo.equals("/update-status")) {
+                // Update order status
+                updateOrderStatus(request, response);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Database error occurred");
+            request.getRequestDispatcher("/admin/error.jsp").forward(request, response);
         }
     }
 
     private void listOrders(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         List<Order> orders = new ArrayList<>();
 
         // Get filter parameters
@@ -55,7 +68,7 @@ public class AdminOrderServlet extends HttpServlet {
 
         // Build SQL query with filters
         StringBuilder sql = new StringBuilder(
-                "SELECT o.*, u.username FROM orders o JOIN user u ON o.user_id = u.user_id WHERE 1=1");
+                "SELECT o.*, u.username FROM orders o JOIN user u ON o.user_id = u.id WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (status != null && !status.isEmpty()) {
@@ -86,11 +99,13 @@ public class AdminOrderServlet extends HttpServlet {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Order order = new Order();
-                order.setOrderId(rs.getInt("order_id"));
+                order.setId(rs.getInt("id"));
                 order.setUserId(rs.getInt("user_id"));
-                order.setUsername(rs.getString("username"));
                 order.setTotalAmount(rs.getBigDecimal("total_amount"));
                 order.setStatus(rs.getString("status"));
+                order.setShippingAddress(rs.getString("shipping_address"));
+                order.setReceiverName(rs.getString("receiver_name"));
+                order.setReceiverPhone(rs.getString("receiver_phone"));
                 order.setCreatedAt(rs.getTimestamp("created_at"));
                 order.setUpdatedAt(rs.getTimestamp("updated_at"));
                 orders.add(order);
@@ -111,9 +126,6 @@ public class AdminOrderServlet extends HttpServlet {
                     request.setAttribute("currentPage", page);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error fetching orders");
         }
 
         request.setAttribute("orders", orders);
@@ -121,26 +133,29 @@ public class AdminOrderServlet extends HttpServlet {
     }
 
     private void getOrderDetails(HttpServletRequest request, HttpServletResponse response, int orderId)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         try (Connection conn = DBUtil.getConnection()) {
             // Get order details
-            String orderSql = "SELECT o.*, u.username FROM orders o JOIN user u ON o.user_id = u.user_id WHERE o.order_id = ?";
+            String orderSql = "SELECT o.*, u.username FROM orders o JOIN user u ON o.user_id = u.id WHERE o.id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(orderSql)) {
                 stmt.setInt(1, orderId);
                 ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
                     Order order = new Order();
-                    order.setOrderId(rs.getInt("order_id"));
+                    order.setId(rs.getInt("id"));
                     order.setUserId(rs.getInt("user_id"));
-                    order.setUsername(rs.getString("username"));
                     order.setTotalAmount(rs.getBigDecimal("total_amount"));
                     order.setStatus(rs.getString("status"));
+                    order.setShippingAddress(rs.getString("shipping_address"));
+                    order.setReceiverName(rs.getString("receiver_name"));
+                    order.setReceiverPhone(rs.getString("receiver_phone"));
                     order.setCreatedAt(rs.getTimestamp("created_at"));
                     order.setUpdatedAt(rs.getTimestamp("updated_at"));
 
                     // Get order items
-                    String itemsSql = "SELECT oi.*, b.title FROM order_items oi JOIN book b ON oi.book_id = b.id WHERE oi.order_id = ?";
+                    String itemsSql = "SELECT oi.*, b.title, b.author, b.price, b.cover_image FROM order_items oi " +
+                                    "JOIN book b ON oi.book_id = b.id WHERE oi.order_id = ?";
                     try (PreparedStatement itemsStmt = conn.prepareStatement(itemsSql)) {
                         itemsStmt.setInt(1, orderId);
                         ResultSet itemsRs = itemsStmt.executeQuery();
@@ -148,15 +163,24 @@ public class AdminOrderServlet extends HttpServlet {
                         List<OrderItem> items = new ArrayList<>();
                         while (itemsRs.next()) {
                             OrderItem item = new OrderItem();
-                            item.setItemId(itemsRs.getInt("item_id"));
+                            item.setId(itemsRs.getInt("id"));
                             item.setOrderId(itemsRs.getInt("order_id"));
                             item.setBookId(itemsRs.getInt("book_id"));
-                            item.setBookTitle(itemsRs.getString("title"));
                             item.setQuantity(itemsRs.getInt("quantity"));
                             item.setPrice(itemsRs.getBigDecimal("price"));
+                            
+                            // Set book information
+                            Book book = new Book();
+                            book.setId(itemsRs.getInt("book_id"));
+                            book.setTitle(itemsRs.getString("title"));
+                            book.setAuthor(itemsRs.getString("author"));
+                            book.setPrice(itemsRs.getBigDecimal("price"));
+                            book.setCoverImage(itemsRs.getString("cover_image"));
+                            item.setBook(book);
+                            
                             items.add(item);
                         }
-                        order.setItems(items);
+                        order.setOrderItems(items);
                     }
 
                     request.setAttribute("order", order);
@@ -164,20 +188,17 @@ public class AdminOrderServlet extends HttpServlet {
                     return;
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error fetching order details");
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/orders");
     }
 
     private void updateOrderStatus(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         int orderId = Integer.parseInt(request.getParameter("orderId"));
         String status = request.getParameter("status");
 
-        String sql = "UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE order_id = ?";
+        String sql = "UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -186,11 +207,8 @@ public class AdminOrderServlet extends HttpServlet {
             stmt.executeUpdate();
 
             request.setAttribute("message", "Order status updated successfully");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error updating order status");
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/orders");
     }
-}
+} 

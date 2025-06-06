@@ -43,13 +43,10 @@ public class CartDAO {
 
     // 添加商品到购物车
     public boolean addItem(int userId, int bookId, int quantity) {
-        int cartId = getOrCreateCart(userId);
-        if (cartId == -1) return false;
-
-        String sql = "INSERT INTO cart_item (cart_id, book_id, quantity) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO cart_item (user_id, book_id, quantity) VALUES (?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, cartId);
+            ps.setInt(1, userId);
             ps.setInt(2, bookId);
             ps.setInt(3, quantity);
             return ps.executeUpdate() > 0;
@@ -89,10 +86,9 @@ public class CartDAO {
     // 获取用户购物车中的所有商品
     public List<CartItem> getCartItems(int userId) {
         List<CartItem> items = new ArrayList<>();
-        String sql = "SELECT ci.id, ci.cart_id, ci.book_id, ci.quantity " +
+        String sql = "SELECT ci.id, ci.user_id, ci.book_id, ci.quantity " +
                     "FROM cart_item ci " +
-                    "JOIN cart c ON ci.cart_id = c.id " +
-                    "WHERE c.user_id = ?";
+                    "WHERE ci.user_id = ?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -102,7 +98,8 @@ public class CartDAO {
             while (rs.next()) {
                 CartItem item = new CartItem();
                 item.setId(rs.getInt("id"));
-                item.setCartId(rs.getInt("cart_id"));
+                item.setUserId(rs.getInt("user_id"));
+                item.setBookId(rs.getInt("book_id"));
                 item.setQuantity(rs.getInt("quantity"));
                 
                 // 获取图书信息
@@ -119,13 +116,10 @@ public class CartDAO {
 
     // 清空购物车
     public boolean clearCart(int userId) {
-        int cartId = getOrCreateCart(userId);
-        if (cartId == -1) return false;
-
-        String sql = "DELETE FROM cart_item WHERE cart_id = ?";
+        String sql = "DELETE FROM cart_item WHERE user_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, cartId);
+            ps.setInt(1, userId);
             return ps.executeUpdate() >= 0;
         } catch (SQLException e) {
             e.printStackTrace();

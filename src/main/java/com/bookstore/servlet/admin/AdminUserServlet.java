@@ -32,6 +32,7 @@ public class AdminUserServlet extends HttpServlet {
             listUsers(request, response);
         } else if (pathInfo.equals("/add")) {
             // 显示添加用户表单
+            request.setAttribute("user", null); // 确保user属性为null，表示是添加操作
             request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
         } else if (pathInfo.equals("/edit")) {
             // 显示编辑用户表单

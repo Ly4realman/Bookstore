@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 @WebServlet("/bookDetail")
 public class BookDetailServlet extends HttpServlet {
@@ -32,6 +33,10 @@ public class BookDetailServlet extends HttpServlet {
             }
         } catch (NumberFormatException e) {
             response.sendRedirect("index"); // 如果id格式不正确，重定向到首页
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "获取图书详情失败");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 } 

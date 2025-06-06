@@ -2,9 +2,10 @@ package com.bookstore.bean;
 
 public class CartItem {
     private int id;
-    private int cartId;
-    private Book book;
+    private int userId;
+    private int bookId;
     private int quantity;
+    private Book book;
 
     public int getId() {
         return id;
@@ -14,20 +15,20 @@ public class CartItem {
         this.id = id;
     }
 
-    public int getCartId() {
-        return cartId;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setCartId(int cartId) {
-        this.cartId = cartId;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public Book getBook() {
-        return book;
+    public int getBookId() {
+        return bookId;
     }
 
-    public void setBook(Book book) {
-        this.book = book;
+    public void setBookId(int bookId) {
+        this.bookId = bookId;
     }
 
     public int getQuantity() {
@@ -37,4 +38,12 @@ public class CartItem {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-} 
+
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
+    }
+}

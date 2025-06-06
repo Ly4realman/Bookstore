@@ -37,5 +37,14 @@
     <p class="text-muted">未找到相关图书。</p>
   </c:if>
 </div>
+
+<!-- 页脚 -->
+<footer class="bg-light py-4 mt-5">
+  <div class="container text-center text-muted">
+    <p>&copy; 2025 糊涂书店. All rights reserved.</p>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

@@ -53,7 +53,7 @@
       </div>
     </div>
 
-    <p>还没有账号？<a href="register.jsp">点击注册</a></p>
+    <p>还没有账号？<a href="/user-page/register.jsp">点击注册</a></p>
 
     <% String error = (String) request.getAttribute("error"); %>
     <% if (error != null) { %>

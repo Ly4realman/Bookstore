@@ -56,21 +56,39 @@ ALTER TABLE book
 UPDATE book SET is_hot = 1, cover_image = 'images/book1.jpg' WHERE id = 1;
 UPDATE book SET is_hot = 1, cover_image = 'images/book2.jpg' WHERE id = 2;
 
--- 购物车表
-CREATE TABLE cart (
+-- 购物车项表
+DROP TABLE IF EXISTS cart_item;
+CREATE TABLE cart_item (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
+    book_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (book_id) REFERENCES book(id)
+);
+
+-- 订单表
+CREATE TABLE orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING, PAID, SHIPPED, COMPLETED, CANCELLED
+    shipping_address VARCHAR(255) NOT NULL,
+    receiver_name VARCHAR(50) NOT NULL,
+    receiver_phone VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
--- 购物车项表
-CREATE TABLE cart_item (
+-- 订单项表
+CREATE TABLE order_items (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    cart_id INT NOT NULL,
+    order_id INT NOT NULL,
     book_id INT NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
-    FOREIGN KEY (cart_id) REFERENCES cart(id),
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (book_id) REFERENCES book(id)
 );
 

@@ -93,21 +93,50 @@ public class BookDAO {
         return list;
     }
 
-    public Book getBookById(int id) {
+    public Book getBookById(int id) throws SQLException {
         String sql = "SELECT * FROM book WHERE id = ?";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return mapResultSetToBook(rs);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Book book = new Book();
+                    book.setId(rs.getInt("id"));
+                    book.setTitle(rs.getString("title"));
+                    book.setAuthor(rs.getString("author"));
+                    book.setPrice(rs.getBigDecimal("price"));
+                    book.setStock(rs.getInt("stock"));
+                    book.setDescription(rs.getString("description"));
+                    book.setCoverImage(rs.getString("cover_image"));
+                    book.setHot(rs.getBoolean("is_hot"));
+                    book.setSales(rs.getInt("sales"));
+                    book.setRecommendation(rs.getString("recommendation"));
+                    return book;
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return null;
     }
 
+    public void updateBook(Book book) throws SQLException {
+        String sql = "UPDATE book SET title = ?, author = ?, price = ?, stock = ?, " +
+                    "description = ?, cover_image = ?, is_hot = ?, sales = ?, recommendation = ? " +
+                    "WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, book.getTitle());
+            stmt.setString(2, book.getAuthor());
+            stmt.setBigDecimal(3, book.getPrice());
+            stmt.setInt(4, book.getStock());
+            stmt.setString(5, book.getDescription());
+            stmt.setString(6, book.getCoverImage());
+            stmt.setBoolean(7, book.isHot());
+            stmt.setInt(8, book.getSales());
+            stmt.setString(9, book.getRecommendation());
+            stmt.setInt(10, book.getId());
+            
+            stmt.executeUpdate();
+        }
+    }
 }
