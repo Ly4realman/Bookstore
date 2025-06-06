@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="zh_CN" />
+<fmt:setTimeZone value="Asia/Shanghai" />
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -58,7 +61,7 @@
                         <span class="text-muted">订单号：${order.id}</span>
                     </div>
                     <div class="col text-end">
-                        <span class="badge bg-${order.status eq 'PENDING' ? 'warning' : 
+                        <span class="badge bg-${order.status eq 'PENDING' ? 'warning' :
                                            order.status eq 'PAID' ? 'info' :
                                            order.status eq 'SHIPPED' ? 'primary' :
                                            order.status eq 'COMPLETED' ? 'success' : 'danger'}">
@@ -70,24 +73,20 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="order-body">
-                <div class="row">
+                <h6 class="text-muted">书籍清单</h6>
+                <ul class="list-group list-group-flush">
                     <c:forEach items="${order.orderItems}" var="item">
-                        <div class="col-md-6 mb-3">
-                            <div class="d-flex align-items-center">
-                                <img src="${item.book.coverImage}" alt="${item.book.title}" class="book-image me-3">
-                                <div>
-                                    <h6 class="mb-1">${item.book.title}</h6>
-                                    <p class="text-muted mb-1">数量：${item.quantity}</p>
-                                    <p class="mb-0">￥${item.price}</p>
-                                </div>
-                            </div>
-                        </div>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                ${item.book.title}
+                            <span class="badge bg-secondary rounded-pill">x${item.quantity}</span>
+                        </li>
                     </c:forEach>
-                </div>
+                </ul>
             </div>
-            
+
+
             <div class="order-footer">
                 <div class="row align-items-center">
                     <div class="col">
@@ -99,8 +98,17 @@
                     </div>
                     <div class="col text-end">
                         <span class="h5 mb-0">总计：￥${order.totalAmount}</span>
-                        <a href="${pageContext.request.contextPath}/order/detail?id=${order.id}" 
+                        <c:if test="${order.status eq 'PENDING' || order.status eq 'PENDING_SHIPMENT'}">
+                            <a href="${pageContext.request.contextPath}/order/cancel?id=${order.id}"
+                               class="btn btn-danger btn-sm ms-2"
+                               onclick="return confirm('确定要取消该订单吗？');">
+                                取消订单
+                            </a>
+                        </c:if>
+
+                        <a href="${pageContext.request.contextPath}/order/detail?id=${order.id}"
                            class="btn btn-outline-primary btn-sm ms-3">查看详情</a>
+
                     </div>
                 </div>
             </div>

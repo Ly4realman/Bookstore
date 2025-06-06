@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -29,7 +30,7 @@
 
 <div class="container mt-5">
     <h2 class="mb-4">订单结算</h2>
-    
+
     <form action="${pageContext.request.contextPath}/order/create" method="post">
         <!-- 收货信息 -->
         <div class="checkout-section">
@@ -91,7 +92,8 @@
         </div>
 
         <!-- 提交订单按钮 -->
-        <div class="d-grid gap-2 col-6 mx-auto mb-5">
+        <div class="d-flex justify-content-center gap-3 mb-5">
+            <button class="btn btn-secondary btn-lg" type="button" onclick="history.back()">返回上一页</button>
             <button class="btn btn-primary btn-lg" type="submit">提交订单</button>
         </div>
     </form>

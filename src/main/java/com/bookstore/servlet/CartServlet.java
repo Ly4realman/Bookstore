@@ -63,7 +63,7 @@ public class CartServlet extends HttpServlet {
             if (referer != null) {
                 session.setAttribute("returnUrl", referer);
             }
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect("/user-page/login.jsp");
             return;
         }
 

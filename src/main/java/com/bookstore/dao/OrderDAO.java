@@ -119,36 +119,43 @@ public class OrderDAO {
         return items;
     }
 
-    public List<Order> getUserOrders(int userId) throws SQLException {
-        String sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC";
+    public List<Order> getUserOrdersWithItems(int userId) throws SQLException {
         List<Order> orders = new ArrayList<>();
-        
+        String sql = "SELECT * FROM orders WHERE user_id = ? AND status != 'CANCELLED' ORDER BY created_at DESC";
+
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+
             stmt.setInt(1, userId);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Order order = new Order();
-                    order.setId(rs.getInt("id"));
-                    order.setUserId(rs.getInt("user_id"));
-                    order.setTotalAmount(rs.getBigDecimal("total_amount"));
-                    order.setStatus(rs.getString("status"));
-                    order.setShippingAddress(rs.getString("shipping_address"));
-                    order.setReceiverName(rs.getString("receiver_name"));
-                    order.setReceiverPhone(rs.getString("receiver_phone"));
-                    order.setCreatedAt(rs.getTimestamp("created_at"));
-                    order.setUpdatedAt(rs.getTimestamp("updated_at"));
-                    
-                    // 获取订单项
-                    order.setOrderItems(getOrderItems(order.getId()));
-                    orders.add(order);
-                }
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Order order = mapResultSetToOrder(rs);
+                // 加载订单项及其对应的图书信息
+                order.setOrderItems(getOrderItems(order.getId()));
+                orders.add(order);
             }
         }
+
         return orders;
     }
+
+
+
+
+    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+        Order order = new Order();
+        order.setId(rs.getInt("id"));
+        order.setUserId(rs.getInt("user_id"));
+        order.setStatus(rs.getString("status"));
+        order.setTotalAmount(rs.getBigDecimal("total_amount"));
+        order.setReceiverName(rs.getString("receiver_name"));
+        order.setReceiverPhone(rs.getString("receiver_phone"));
+        order.setShippingAddress(rs.getString("shipping_address"));
+        order.setCreatedAt(rs.getTimestamp("created_at"));
+        return order;
+    }
+
+
 
     public void updateOrderStatus(int orderId, String status) throws SQLException {
         String sql = "UPDATE orders SET status = ? WHERE id = ?";

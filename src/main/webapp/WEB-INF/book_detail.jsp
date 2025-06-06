@@ -107,8 +107,6 @@
                         <input type="hidden" name="quantity" value="1">
                         <button type="submit" class="btn btn-primary btn-lg me-2">加入购物车</button>
                     </form>
-                    <a href="${pageContext.request.contextPath}/checkout?bookId=${book.id}" 
-                       class="btn btn-danger btn-lg">立即购买</a>
                 </div>
             </div>
         </div>

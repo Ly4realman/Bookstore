@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="zh_CN" />
+<fmt:setTimeZone value="Asia/Shanghai" />
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -33,15 +36,10 @@
                 <div class="card-header bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">订单详情</h5>
-                        <span class="badge bg-${order.status eq 'PENDING' ? 'warning' : 
-                                           order.status eq 'PENDING_SHIPMENT' ? 'info' :
-                                           order.status eq 'SHIPPED' ? 'primary' :
-                                           order.status eq 'COMPLETED' ? 'success' : 'danger'}">
-                            ${order.status eq 'PENDING' ? '待确认' :
-                              order.status eq 'PENDING_SHIPMENT' ? '待发货' :
-                              order.status eq 'SHIPPED' ? '已发货' :
-                              order.status eq 'COMPLETED' ? '已完成' : '已取消'}
+                        <span class="badge bg-${statusColor}">
+                            ${statusLabel}
                         </span>
+
                     </div>
                 </div>
                 
@@ -53,6 +51,18 @@
                         <p class="mb-1">收货人：${order.receiverName}</p>
                         <p class="mb-1">联系电话：${order.receiverPhone}</p>
                         <p class="mb-1">收货地址：${order.shippingAddress}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted">购买书籍列表</h6>
+                        <ul class="list-group">
+                            <c:forEach items="${order.orderItems}" var="item">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        ${item.book.title}
+                                    <span class="badge bg-primary rounded-pill">x${item.quantity}</span>
+                                </li>
+                            </c:forEach>
+                        </ul>
                     </div>
 
                     <div class="mb-4">
@@ -100,12 +110,23 @@
                         <a href="${pageContext.request.contextPath}/order/list" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> 返回订单列表
                         </a>
+
+                        <div>
+                            <c:if test="${order.status eq 'PENDING' || order.status eq 'PENDING_SHIPMENT'}">
+                                <a href="${pageContext.request.contextPath}/order/cancel?id=${order.id}"
+                                   class="btn btn-danger"
+                                   onclick="return confirm('确定要取消该订单吗？');">
+                                    取消订单
+                                </a>
+                            </c:if>
+
                         <c:if test="${order.status eq 'PENDING'}">
                             <a href="${pageContext.request.contextPath}/order/confirm?id=${order.id}" 
                                class="btn btn-primary">
                                 确认购买
                             </a>
                         </c:if>
+                        </div>
                     </div>
                 </div>
             </div>
