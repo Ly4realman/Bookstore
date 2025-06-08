@@ -15,6 +15,7 @@ public class Order {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private List<OrderItem> orderItems;
+    private String username;
 
     public Order() {
     }
@@ -99,4 +100,11 @@ public class Order {
         this.orderItems = orderItems;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }

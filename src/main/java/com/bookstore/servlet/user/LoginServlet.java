@@ -34,17 +34,30 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-
         User user = userDAO.findByUsername(username);
         if (user != null && BCrypt.checkpw(password, user.getPassword())) {
-            // 清除旧 session，创建新 session（防 session fixation）
-            session.invalidate();
-            HttpSession newSession = request.getSession(true);
-            newSession.setAttribute("user", user);
-            newSession.setMaxInactiveInterval(30 * 60); // 30分钟过期
+            // 保存管理员的登录状态（如果存在）
+            String adminUsername = (String) session.getAttribute("adminUsername");
+            Object adminObj = session.getAttribute("admin");
+
+            // 清除用户相关的 session 数据
+            session.removeAttribute("user");
+            session.removeAttribute("captcha");
+
+            // 重新设置管理员的登录状态（如果之前存在）
+            if (adminUsername != null) {
+                session.setAttribute("adminUsername", adminUsername);
+            }
+            if (adminObj != null) {
+                session.setAttribute("admin", adminObj);
+            }
+
+            // 设置用户登录状态
+            session.setAttribute("user", user);
+            session.setMaxInactiveInterval(30 * 60); // 30分钟过期
 
             // 设置 cookie 安全属性
-            Cookie cookie = new Cookie("JSESSIONID", newSession.getId());
+            Cookie cookie = new Cookie("JSESSIONID", session.getId());
             cookie.setHttpOnly(true);
             cookie.setSecure(true); // 仅在 HTTPS 启用时设置
             response.addCookie(cookie);

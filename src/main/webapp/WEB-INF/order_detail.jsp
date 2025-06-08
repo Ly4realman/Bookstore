@@ -82,7 +82,7 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="${pageContext.request.contextPath}/${item.book.coverImage}" 
+                                                    <img src="${pageContext.request.contextPath}${item.book.coverImage}" 
                                                          alt="${item.book.title}" class="book-image me-3">
                                                     <div>
                                                         <div>${item.book.title}</div>

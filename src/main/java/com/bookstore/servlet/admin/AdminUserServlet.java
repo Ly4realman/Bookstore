@@ -104,6 +104,7 @@ public class AdminUserServlet extends HttpServlet {
         if (username == null || username.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "用户名和密码不能为空");
+            request.setAttribute("user", null);
             request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
             return;
         }
@@ -111,6 +112,7 @@ public class AdminUserServlet extends HttpServlet {
         // 验证用户名是否已存在
         if (userDAO.findByUsername(username) != null) {
             request.setAttribute("error", "用户名已存在");
+            request.setAttribute("user", null);
             request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
             return;
         }
@@ -118,6 +120,7 @@ public class AdminUserServlet extends HttpServlet {
         // 验证密码长度
         if (password.length() < 6) {
             request.setAttribute("error", "密码长度必须至少为6位");
+            request.setAttribute("user", null);
             request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
             return;
         }
@@ -125,6 +128,7 @@ public class AdminUserServlet extends HttpServlet {
         // 验证手机号格式
         if (phone != null && !phone.trim().isEmpty() && !phone.matches("^1[3-9]\\d{9}$")) {
             request.setAttribute("error", "手机号格式不正确");
+            request.setAttribute("user", null);
             request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
             return;
         }
@@ -151,10 +155,22 @@ public class AdminUserServlet extends HttpServlet {
             String email = request.getParameter("email");
             String password = request.getParameter("password");
 
-            // 验证手机号格式
+            // 验证手机号格式（如果不为空）
             if (phone != null && !phone.trim().isEmpty() && !phone.matches("^1[3-9]\\d{9}$")) {
                 request.setAttribute("error", "手机号格式不正确");
                 request.setAttribute("user", new User());
+                request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
+                return;
+            }
+
+            // 验证密码长度（如果提供了新密码）
+            if (password != null && !password.trim().isEmpty() && password.length() < 6) {
+                request.setAttribute("error", "密码长度必须至少为6位");
+                User user = new User();
+                user.setId(userId);
+                user.setPhone(phone);
+                user.setEmail(email);
+                request.setAttribute("user", user);
                 request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
                 return;
             }
@@ -164,21 +180,10 @@ public class AdminUserServlet extends HttpServlet {
             user.setPhone(phone);
             user.setEmail(email);
 
-            // 如果提供了新密码，则更新密码
-            if (password != null && !password.trim().isEmpty()) {
-                if (password.length() < 6) {
-                    request.setAttribute("error", "密码长度必须至少为6位");
-                    request.setAttribute("user", user);
-                    request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
-                    return;
-                }
-                user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-            }
-
-            if (userDAO.updateUser(user)) {
+            if (userDAO.updateUserByAdmin(user, password)) {
                 response.sendRedirect(request.getContextPath() + "/admin/users");
             } else {
-                request.setAttribute("error", "更新用户失败");
+                request.setAttribute("error", "更新用户信息失败");
                 request.setAttribute("user", user);
                 request.getRequestDispatcher("/admin/user-form.jsp").forward(request, response);
             }

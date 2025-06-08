@@ -62,13 +62,13 @@
                     </div>
                     <div class="col text-end">
                         <span class="badge bg-${order.status eq 'PENDING' ? 'warning' :
-                                           order.status eq 'PAID' ? 'info' :
+                                           order.status eq 'PENDING_SHIPMENT' ? 'info' :
                                            order.status eq 'SHIPPED' ? 'primary' :
-                                           order.status eq 'COMPLETED' ? 'success' : 'danger'}">
+                                           order.status eq 'CANCELLED' ? 'danger' : 'secondary'}">
                             ${order.status eq 'PENDING' ? '待确认' :
-                              order.status eq 'PAID' ? '已确认' :
-                              order.status eq 'SHIPPED' ? '未发货' :
-                              order.status eq 'COMPLETED' ? '已发货' : '待发货'}
+                              order.status eq 'PENDING_SHIPMENT' ? '待发货' :
+                              order.status eq 'SHIPPED' ? '已发货' :
+                              order.status eq 'CANCELLED' ? '已取消' : '未知状态'}
                         </span>
                     </div>
                 </div>

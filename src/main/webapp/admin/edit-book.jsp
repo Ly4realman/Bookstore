@@ -7,6 +7,34 @@
   <title>书店管理系统</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .image-preview {
+      max-width: 200px;
+      max-height: 300px;
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 5px;
+    }
+    .preview-container {
+      position: relative;
+      display: inline-block;
+    }
+    .remove-image {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      border-radius: 50%;
+      padding: 5px 8px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .remove-image:hover {
+      background: rgba(255, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -83,12 +111,18 @@
 
             <div class="mb-3">
               <label for="coverImage" class="form-label">封面图片</label>
-              <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*">
-              <c:if test="${not empty book.coverImage}">
-                <div class="mt-2">
-                  <img src="${pageContext.request.contextPath}${book.coverImage}" alt="${book.title}" style="max-width: 200px;">
-                </div>
-              </c:if>
+              <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/jpeg,image/png,image/gif,image/webp" onchange="previewImage(this);">
+              <div class="form-text">支持的格式：JPEG、PNG、GIF、WebP，最大文件大小：10MB</div>
+              <input type="hidden" name="currentCoverImage" value="${book.coverImage}" id="currentCoverImage">
+              <div id="imagePreviewContainer" class="preview-container mt-2 ${empty book.coverImage ? 'd-none' : ''}">
+                <img src="${pageContext.request.contextPath}${book.coverImage}" 
+                     alt="${book.title}" 
+                     class="image-preview" 
+                     id="imagePreview">
+                <button type="button" class="remove-image" onclick="removeImage()">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
             </div>
 
             <div class="mb-3 form-check">
@@ -129,5 +163,35 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function previewImage(input) {
+  const previewContainer = document.getElementById('imagePreviewContainer');
+  const preview = document.getElementById('imagePreview');
+  const currentImageInput = document.getElementById('currentCoverImage');
+
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      previewContainer.classList.remove('d-none');
+    }
+    
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function removeImage() {
+  const previewContainer = document.getElementById('imagePreviewContainer');
+  const preview = document.getElementById('imagePreview');
+  const fileInput = document.getElementById('coverImage');
+  const currentImageInput = document.getElementById('currentCoverImage');
+  
+  preview.src = '';
+  fileInput.value = '';
+  currentImageInput.value = '';
+  previewContainer.classList.add('d-none');
+}
+</script>
 </body>
 </html>

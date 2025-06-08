@@ -15,7 +15,21 @@ public class LogoutServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            session.invalidate();
+            // 保存管理员的登录状态（如果存在）
+            String adminUsername = (String) session.getAttribute("adminUsername");
+            Object adminObj = session.getAttribute("admin");
+
+            // 清除用户相关的 session 数据
+            session.removeAttribute("user");
+            session.removeAttribute("captcha");
+
+            // 重新设置管理员的登录状态（如果之前存在）
+            if (adminUsername != null) {
+                session.setAttribute("adminUsername", adminUsername);
+            }
+            if (adminObj != null) {
+                session.setAttribute("admin", adminObj);
+            }
         }
         response.sendRedirect(request.getContextPath() + "/index");
     }

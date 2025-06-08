@@ -8,6 +8,7 @@ import com.bookstore.bean.User;
 import com.bookstore.dao.BookDAO;
 import com.bookstore.dao.CartDAO;
 import com.bookstore.dao.OrderDAO;
+import com.bookstore.util.DBUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,6 @@ public class OrderServlet extends HttpServlet {
         }
     }
 
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -70,8 +71,6 @@ public class OrderServlet extends HttpServlet {
                 return "待发货";
             case "SHIPPED":
                 return "已发货";
-            case "COMPLETED":
-                return "已完成";
             case "CANCELLED":
                 return "已取消";
             default:
@@ -87,8 +86,6 @@ public class OrderServlet extends HttpServlet {
                 return "info";
             case "SHIPPED":
                 return "primary";
-            case "COMPLETED":
-                return "success";
             case "CANCELLED":
                 return "danger";
             default:
@@ -96,25 +93,23 @@ public class OrderServlet extends HttpServlet {
         }
     }
 
-
-
-    private void showUserOrders(HttpServletRequest request, HttpServletResponse response) 
+    private void showUserOrders(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-        
+
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/user/login");
             return;
         }
-        
+
         try {
             List<Order> orders = orderDAO.getUserOrdersWithItems(user.getId());
             request.setAttribute("orders", orders);
             request.getRequestDispatcher("/WEB-INF/orders.jsp").forward(request, response);
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "获取订单列表失败");
         }
     }
 
@@ -155,7 +150,7 @@ public class OrderServlet extends HttpServlet {
         }
     }
 
-    private void confirmOrder(HttpServletRequest request, HttpServletResponse response) 
+    private void confirmOrder(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String orderIdStr = request.getParameter("id");
         if (orderIdStr == null) {
@@ -166,12 +161,12 @@ public class OrderServlet extends HttpServlet {
         try {
             int orderId = Integer.parseInt(orderIdStr);
             Order order = orderDAO.getOrderById(orderId);
-            
+
             if (order == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
-            
+
             // 验证订单所属用户
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
@@ -179,13 +174,13 @@ public class OrderServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-            
+
             // 更新订单状态为待发货
             orderDAO.updateOrderStatus(orderId, "PENDING_SHIPMENT");
-            
+
             // 重定向到订单列表页面
             response.sendRedirect(request.getContextPath() + "/order/list");
-            
+
         } catch (NumberFormatException | SQLException e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -269,7 +264,6 @@ public class OrderServlet extends HttpServlet {
         }
     }
 
-
     private void cancelOrder(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String orderIdStr = request.getParameter("id");
@@ -278,7 +272,11 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
+        Connection conn = null;
         try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false); // 开启事务
+
             int orderId = Integer.parseInt(orderIdStr);
             Order order = orderDAO.getOrderById(orderId);
 
@@ -299,17 +297,37 @@ public class OrderServlet extends HttpServlet {
             // 更新状态为已取消
             orderDAO.updateOrderStatus(orderId, "CANCELLED");
 
-            // 可选：回滚库存
-            // for (OrderItem item : order.getOrderItems()) {
-            //     bookDAO.increaseStock(item.getBookId(), item.getQuantity());
-            // }
+            // 恢复库存
+            for (OrderItem item : order.getOrderItems()) {
+                Book book = bookDAO.getBookById(item.getBookId());
+                if (book != null) {
+                    book.setStock(book.getStock() + item.getQuantity());
+                    bookDAO.updateBook(book);
+                }
+            }
 
+            conn.commit(); // 提交事务
             response.sendRedirect(request.getContextPath() + "/order/list");
         } catch (Exception e) {
+            try {
+                if (conn != null) {
+                    conn.rollback(); // 发生错误时回滚
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true); // 恢复自动提交
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
-
 
 }

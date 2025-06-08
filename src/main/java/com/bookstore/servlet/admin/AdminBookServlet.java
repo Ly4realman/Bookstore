@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
@@ -22,6 +23,80 @@ import java.util.UUID;
         maxRequestSize = 1024 * 1024 * 100 // 100 MB
 )
 public class AdminBookServlet extends HttpServlet {
+    private static final String UPLOAD_DIRECTORY = "images/covers";
+    private static final String[] ALLOWED_IMAGE_TYPES = {
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp"
+    };
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        String uploadPath = getServletContext().getRealPath("/" + UPLOAD_DIRECTORY);
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+    }
+
+    private boolean isImageTypeAllowed(String contentType) {
+        for (String allowedType : ALLOWED_IMAGE_TYPES) {
+            if (allowedType.equals(contentType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String handleImageUpload(Part filePart, String currentImage) throws IOException {
+        if (filePart == null || filePart.getSize() == 0) {
+            return currentImage;
+        }
+
+        if (!isImageTypeAllowed(filePart.getContentType())) {
+            throw new IOException("不支持的图片格式。只支持 JPEG、PNG、GIF 和 WebP 格式。");
+        }
+
+        String fileName = UUID.randomUUID().toString() + getFileExtension(filePart);
+        String uploadPath = getServletContext().getRealPath("/" + UPLOAD_DIRECTORY);
+
+        // 确保上传目录存在
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+
+        // 如果存在旧图片，删除它
+        if (currentImage != null && !currentImage.isEmpty()) {
+            String oldImagePath = getServletContext().getRealPath(currentImage);
+            File oldImage = new File(oldImagePath);
+            if (oldImage.exists()) {
+                oldImage.delete();
+            }
+        }
+
+        // 写入新图片
+        filePart.write(uploadPath + File.separator + fileName);
+        return "/" + UPLOAD_DIRECTORY + "/" + fileName;
+    }
+
+    private String getFileExtension(Part part) {
+        String contentType = part.getContentType();
+        switch (contentType) {
+            case "image/jpeg":
+                return ".jpg";
+            case "image/png":
+                return ".png";
+            case "image/gif":
+                return ".gif";
+            case "image/webp":
+                return ".webp";
+            default:
+                return "";
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -73,7 +148,6 @@ public class AdminBookServlet extends HttpServlet {
                 book.setDescription(rs.getString("description"));
                 book.setCoverImage(rs.getString("cover_image"));
                 book.setHot(rs.getBoolean("is_hot"));
-                book.setSales(rs.getInt("sales"));
                 books.add(book);
             }
         } catch (SQLException e) {
@@ -98,10 +172,7 @@ public class AdminBookServlet extends HttpServlet {
         Part filePart = request.getPart("coverImage");
         String coverImage = null;
         if (filePart != null && filePart.getSize() > 0) {
-            String fileName = UUID.randomUUID().toString() + getFileExtension(filePart);
-            String uploadPath = getServletContext().getRealPath("/uploads/covers/");
-            filePart.write(uploadPath + fileName);
-            coverImage = "/uploads/covers/" + fileName;
+            coverImage = handleImageUpload(filePart, null);
         }
 
         Connection conn = null;
@@ -174,10 +245,7 @@ public class AdminBookServlet extends HttpServlet {
         Part filePart = request.getPart("coverImage");
         String coverImage = request.getParameter("currentCoverImage");
         if (filePart != null && filePart.getSize() > 0) {
-            String fileName = UUID.randomUUID().toString() + getFileExtension(filePart);
-            String uploadPath = getServletContext().getRealPath("/uploads/covers/");
-            filePart.write(uploadPath + fileName);
-            coverImage = "/uploads/covers/" + fileName;
+            coverImage = handleImageUpload(filePart, coverImage);
         }
 
         String sql = "UPDATE book SET title=?, author=?, price=?, stock=?, description=?, cover_image=?, is_hot=? WHERE id=?";
@@ -279,7 +347,6 @@ public class AdminBookServlet extends HttpServlet {
                 book.setDescription(rs.getString("description"));
                 book.setCoverImage(rs.getString("cover_image"));
                 book.setHot(rs.getBoolean("is_hot"));
-                book.setSales(rs.getInt("sales"));
 
                 request.setAttribute("book", book);
                 request.getRequestDispatcher("/admin/edit-book.jsp").forward(request, response);
@@ -291,18 +358,5 @@ public class AdminBookServlet extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/books");
-    }
-
-    private String getFileExtension(Part part) {
-        String contentDisp = part.getHeader("content-disposition");
-        String[] tokens = contentDisp.split(";");
-        for (String token : tokens) {
-            if (token.trim().startsWith("filename")) {
-                String fileName = token.substring(token.indexOf("=") + 2, token.length() - 1);
-                int dotIndex = fileName.lastIndexOf('.');
-                return dotIndex > 0 ? fileName.substring(dotIndex) : "";
-            }
-        }
-        return "";
     }
 }

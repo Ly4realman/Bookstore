@@ -1,40 +1,54 @@
 package com.bookstore.servlet.admin;
 
-import com.bookstore.bean.Book;
 import com.bookstore.bean.Order;
-import com.bookstore.bean.OrderItem;
-import com.bookstore.util.DBUtil;
+import com.bookstore.dao.OrderDAO;
+import com.bookstore.dao.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
-@WebServlet({ "/admin/orders", "/admin/orders/*" })
+@WebServlet("/admin/orders/*")
 public class AdminOrderServlet extends HttpServlet {
+    private final OrderDAO orderDAO = new OrderDAO();
+    private final UserDAO userDAO = new UserDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
+        // 检查管理员是否登录
+        HttpSession session = request.getSession();
+        if (session.getAttribute("admin") == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/login");
+            return;
+        }
+
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                // List all orders
+                // 显示订单列表
                 listOrders(request, response);
+            } else if (pathInfo.equals("/detail")) {
+                // 显示订单详情
+                showOrderDetail(request, response);
             } else {
-                // View order details
-                int orderId = Integer.parseInt(pathInfo.substring(1));
-                getOrderDetails(request, response, orderId);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("error", "Database error occurred");
-            request.getRequestDispatcher("/admin/error.jsp").forward(request, response);
+            request.setAttribute("error", "数据库操作失败");
+            request.getRequestDispatcher("/admin/orders.jsp").forward(request, response);
         }
     }
 
@@ -43,154 +57,72 @@ public class AdminOrderServlet extends HttpServlet {
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
 
+        // 检查管理员是否登录
+        HttpSession session = request.getSession();
+        if (session.getAttribute("admin") == null) {
+            response.sendRedirect(request.getContextPath() + "/admin/login");
+            return;
+        }
+
         try {
-            if (pathInfo != null && pathInfo.equals("/update-status")) {
-                // Update order status
+            if (pathInfo.equals("/update-status")) {
+                // 更新订单状态
                 updateOrderStatus(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("error", "Database error occurred");
-            request.getRequestDispatcher("/admin/error.jsp").forward(request, response);
+            request.setAttribute("error", "数据库操作失败");
+            request.getRequestDispatcher("/admin/orders.jsp").forward(request, response);
         }
     }
 
     private void listOrders(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        List<Order> orders = new ArrayList<>();
-
-        // Get filter parameters
+        // 获取筛选参数
         String status = request.getParameter("status");
         String dateFrom = request.getParameter("dateFrom");
         String dateTo = request.getParameter("dateTo");
-        int page = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
-        int pageSize = 10;
 
-        // Build SQL query with filters
-        StringBuilder sql = new StringBuilder(
-                "SELECT o.*, u.username FROM orders o JOIN user u ON o.user_id = u.id WHERE 1=1");
-        List<Object> params = new ArrayList<>();
+        // 构建查询条件
+        Timestamp fromDate = null;
+        Timestamp toDate = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND o.status = ?");
-            params.add(status);
-        }
-        if (dateFrom != null && !dateFrom.isEmpty()) {
-            sql.append(" AND DATE(o.created_at) >= ?");
-            params.add(dateFrom);
-        }
-        if (dateTo != null && !dateTo.isEmpty()) {
-            sql.append(" AND DATE(o.created_at) <= ?");
-            params.add(dateTo);
-        }
-
-        sql.append(" ORDER BY o.created_at DESC LIMIT ? OFFSET ?");
-        params.add(pageSize);
-        params.add((page - 1) * pageSize);
-
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-            // Set parameters
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
+        try {
+            if (dateFrom != null && !dateFrom.isEmpty()) {
+                Date date = sdf.parse(dateFrom);
+                fromDate = new Timestamp(date.getTime());
             }
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Order order = new Order();
-                order.setId(rs.getInt("id"));
-                order.setUserId(rs.getInt("user_id"));
-                order.setTotalAmount(rs.getBigDecimal("total_amount"));
-                order.setStatus(rs.getString("status"));
-                order.setShippingAddress(rs.getString("shipping_address"));
-                order.setReceiverName(rs.getString("receiver_name"));
-                order.setReceiverPhone(rs.getString("receiver_phone"));
-                order.setCreatedAt(rs.getTimestamp("created_at"));
-                order.setUpdatedAt(rs.getTimestamp("updated_at"));
-                orders.add(order);
+            if (dateTo != null && !dateTo.isEmpty()) {
+                Date date = sdf.parse(dateTo);
+                // 设置为当天的最后一秒
+                toDate = new Timestamp(date.getTime() + 24 * 60 * 60 * 1000 - 1);
             }
-
-            // Get total count for pagination
-            String countSql = sql.toString().replaceFirst("SELECT o.*, u.username", "SELECT COUNT(*)");
-            countSql = countSql.substring(0, countSql.lastIndexOf("LIMIT"));
-            try (PreparedStatement countStmt = conn.prepareStatement(countSql)) {
-                for (int i = 0; i < params.size() - 2; i++) {
-                    countStmt.setObject(i + 1, params.get(i));
-                }
-                ResultSet countRs = countStmt.executeQuery();
-                if (countRs.next()) {
-                    int totalOrders = countRs.getInt(1);
-                    int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
-                    request.setAttribute("totalPages", totalPages);
-                    request.setAttribute("currentPage", page);
-                }
-            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
+        // 获取订单列表
+        List<Order> orders = orderDAO.getOrdersByFilter(status, fromDate, toDate);
+
+        // 设置属性并转发到JSP
         request.setAttribute("orders", orders);
         request.getRequestDispatcher("/admin/orders.jsp").forward(request, response);
     }
 
-    private void getOrderDetails(HttpServletRequest request, HttpServletResponse response, int orderId)
+    private void showOrderDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
-        try (Connection conn = DBUtil.getConnection()) {
-            // Get order details
-            String orderSql = "SELECT o.*, u.username FROM orders o JOIN user u ON o.user_id = u.id WHERE o.id = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(orderSql)) {
-                stmt.setInt(1, orderId);
-                ResultSet rs = stmt.executeQuery();
+        int orderId = Integer.parseInt(request.getParameter("id"));
+        Order order = orderDAO.getOrderById(orderId);
 
-                if (rs.next()) {
-                    Order order = new Order();
-                    order.setId(rs.getInt("id"));
-                    order.setUserId(rs.getInt("user_id"));
-                    order.setTotalAmount(rs.getBigDecimal("total_amount"));
-                    order.setStatus(rs.getString("status"));
-                    order.setShippingAddress(rs.getString("shipping_address"));
-                    order.setReceiverName(rs.getString("receiver_name"));
-                    order.setReceiverPhone(rs.getString("receiver_phone"));
-                    order.setCreatedAt(rs.getTimestamp("created_at"));
-                    order.setUpdatedAt(rs.getTimestamp("updated_at"));
-
-                    // Get order items
-                    String itemsSql = "SELECT oi.*, b.title, b.author, b.price, b.cover_image FROM order_items oi " +
-                                    "JOIN book b ON oi.book_id = b.id WHERE oi.order_id = ?";
-                    try (PreparedStatement itemsStmt = conn.prepareStatement(itemsSql)) {
-                        itemsStmt.setInt(1, orderId);
-                        ResultSet itemsRs = itemsStmt.executeQuery();
-
-                        List<OrderItem> items = new ArrayList<>();
-                        while (itemsRs.next()) {
-                            OrderItem item = new OrderItem();
-                            item.setId(itemsRs.getInt("id"));
-                            item.setOrderId(itemsRs.getInt("order_id"));
-                            item.setBookId(itemsRs.getInt("book_id"));
-                            item.setQuantity(itemsRs.getInt("quantity"));
-                            item.setPrice(itemsRs.getBigDecimal("price"));
-                            
-                            // Set book information
-                            Book book = new Book();
-                            book.setId(itemsRs.getInt("book_id"));
-                            book.setTitle(itemsRs.getString("title"));
-                            book.setAuthor(itemsRs.getString("author"));
-                            book.setPrice(itemsRs.getBigDecimal("price"));
-                            book.setCoverImage(itemsRs.getString("cover_image"));
-                            item.setBook(book);
-                            
-                            items.add(item);
-                        }
-                        order.setOrderItems(items);
-                    }
-
-                    request.setAttribute("order", order);
-                    request.getRequestDispatcher("/admin/order-details.jsp").forward(request, response);
-                    return;
-                }
-            }
+        if (order != null) {
+            request.setAttribute("order", order);
+            request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
-
-        response.sendRedirect(request.getContextPath() + "/admin/orders");
     }
 
     private void updateOrderStatus(HttpServletRequest request, HttpServletResponse response)
@@ -198,17 +130,9 @@ public class AdminOrderServlet extends HttpServlet {
         int orderId = Integer.parseInt(request.getParameter("orderId"));
         String status = request.getParameter("status");
 
-        String sql = "UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        orderDAO.updateOrderStatus(orderId, status.toUpperCase());
 
-            stmt.setString(1, status);
-            stmt.setInt(2, orderId);
-            stmt.executeUpdate();
-
-            request.setAttribute("message", "Order status updated successfully");
-        }
-
+        // 重定向回订单列表
         response.sendRedirect(request.getContextPath() + "/admin/orders");
     }
-} 
+}

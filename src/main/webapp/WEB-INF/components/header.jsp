@@ -13,7 +13,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <!-- 搜索框 -->
             <div class="w-100 d-flex justify-content-center mb-3">
-                <form class="d-flex w-100 justify-content-center" action="search" method="get" style="max-width: 600px; min-width: 250px;">
+                <form class="d-flex w-100 justify-content-center" action="/search" method="get" style="max-width: 600px; min-width: 250px;">
                     <div class="input-group w-100">
                         <input type="text" name="query" class="form-control search-input"
                                placeholder="搜索图书、作者..." required>

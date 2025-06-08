@@ -5,9 +5,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>书店管理系统</title>
+    <title>订单管理 - 书店管理系统</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .order-status {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .address-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .phone-cell {
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -44,13 +62,6 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1>订单管理</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group me-2">
-                        <button type="button" class="btn btn-outline-secondary" onclick="exportOrders()">
-                            <i class="bi bi-download"></i> 导出订单
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <!-- Filter Section -->
@@ -63,11 +74,10 @@
                                     <label for="status" class="form-label">订单状态</label>
                                     <select class="form-select" id="status" name="status">
                                         <option value="">全部</option>
-                                        <option value="pending" ${param.status == 'pending' ? 'selected' : ''}>待付款</option>
-                                        <option value="paid" ${param.status == 'paid' ? 'selected' : ''}>已付款</option>
-                                        <option value="shipped" ${param.status == 'shipped' ? 'selected' : ''}>已发货</option>
-                                        <option value="delivered" ${param.status == 'delivered' ? 'selected' : ''}>已送达</option>
-                                        <option value="cancelled" ${param.status == 'cancelled' ? 'selected' : ''}>已取消</option>
+                                        <option value="PENDING" ${param.status eq 'PENDING' ? 'selected' : ''}>待确认</option>
+                                        <option value="PENDING_SHIPMENT" ${param.status eq 'PENDING_SHIPMENT' ? 'selected' : ''}>待发货</option>
+                                        <option value="SHIPPED" ${param.status eq 'SHIPPED' ? 'selected' : ''}>已发货</option>
+                                        <option value="CANCELLED" ${param.status eq 'CANCELLED' ? 'selected' : ''}>已取消</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
@@ -89,94 +99,69 @@
             </div>
 
             <!-- Orders Table -->
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                    <tr>
-                        <th>订单号</th>
-                        <th>用户</th>
-                        <th>总金额</th>
-                        <th>状态</th>
-                        <th>创建时间</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="order" items="${orders}">
-                        <tr>
-                            <td>${order.orderId}</td>
-                            <td>${order.username}</td>
-                            <td>￥<fmt:formatNumber value="${order.totalAmount}" pattern="#,##0.00"/></td>
-                            <td>
-                                <c:choose>
-                                    <c:when test="${order.status == 'pending'}">
-                                        <span class="badge bg-warning">待付款</span>
-                                    </c:when>
-                                    <c:when test="${order.status == 'paid'}">
-                                        <span class="badge bg-info">已付款</span>
-                                    </c:when>
-                                    <c:when test="${order.status == 'shipped'}">
-                                        <span class="badge bg-primary">已发货</span>
-                                    </c:when>
-                                    <c:when test="${order.status == 'delivered'}">
-                                        <span class="badge bg-success">已送达</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge bg-danger">已取消</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td><fmt:formatDate value="${order.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
-                            <td>
-                                <button class="btn btn-sm btn-primary" onclick="viewOrderDetails(${order.orderId})">
-                                    <i class="bi bi-eye"></i> 查看
-                                </button>
-                                <button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.orderId})">
-                                    <i class="bi bi-arrow-clockwise"></i> 更新
-                                </button>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <c:if test="${totalPages > 1}">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="?page=${currentPage - 1}${not empty param.status ? '&status='.concat(param.status) : ''}">上一页</a>
-                        </li>
-                        <c:forEach begin="1" end="${totalPages}" var="i">
-                            <li class="page-item ${currentPage == i ? 'active' : ''}">
-                                <a class="page-link" href="?page=${i}${not empty param.status ? '&status='.concat(param.status) : ''}">${i}</a>
-                            </li>
-                        </c:forEach>
-                        <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                            <a class="page-link" href="?page=${currentPage + 1}${not empty param.status ? '&status='.concat(param.status) : ''}">下一页</a>
-                        </li>
-                    </ul>
-                </nav>
-            </c:if>
-        </main>
-    </div>
-</div>
-
-<!-- Order Details Modal -->
-<div class="modal fade" id="orderDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">订单详情</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="orderDetailsContent">
-                    <!-- Content will be loaded dynamically -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>订单号</th>
+                                    <th>用户</th>
+                                    <th>收货人</th>
+                                    <th>联系电话</th>
+                                    <th>收货地址</th>
+                                    <th>总金额</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="order" items="${orders}">
+                                    <tr>
+                                        <td>${order.id}</td>
+                                        <td>${order.username}</td>
+                                        <td>${order.receiverName}</td>
+                                        <td class="phone-cell">${order.receiverPhone}</td>
+                                        <td class="address-cell" title="${order.shippingAddress}">${order.shippingAddress}</td>
+                                        <td>￥<fmt:formatNumber value="${order.totalAmount}" pattern="#,##0.00"/></td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${order.status eq 'PENDING'}">
+                                                    <span class="badge bg-warning order-status">待确认</span>
+                                                </c:when>
+                                                <c:when test="${order.status eq 'PENDING_SHIPMENT'}">
+                                                    <span class="badge bg-info order-status">待发货</span>
+                                                </c:when>
+                                                <c:when test="${order.status eq 'SHIPPED'}">
+                                                    <span class="badge bg-primary order-status">已发货</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-danger order-status">已取消</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td><fmt:formatDate value="${order.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="${pageContext.request.contextPath}/admin/orders/detail?id=${order.id}"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> 查看
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                        onclick="updateOrderStatus(${order.id})">
+                                                    <i class="bi bi-pencil"></i> 更新状态
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 </div>
 
@@ -188,23 +173,22 @@
                 <h5 class="modal-title">更新订单状态</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="updateStatusForm" action="${pageContext.request.contextPath}/admin/orders/update-status" method="post">
+            <form action="${pageContext.request.contextPath}/admin/orders/update-status" method="post">
                 <div class="modal-body">
                     <input type="hidden" id="updateOrderId" name="orderId">
                     <div class="mb-3">
                         <label for="newStatus" class="form-label">新状态</label>
                         <select class="form-select" id="newStatus" name="status" required>
-                            <option value="pending">待付款</option>
-                            <option value="paid">已付款</option>
-                            <option value="shipped">已发货</option>
-                            <option value="delivered">已送达</option>
-                            <option value="cancelled">已取消</option>
+                            <option value="PENDING">待确认</option>
+                            <option value="PENDING_SHIPMENT">待发货</option>
+                            <option value="SHIPPED">已发货</option>
+                            <option value="CANCELLED">已取消</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                    <button type="submit" class="btn btn-primary">更新状态</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
                 </div>
             </form>
         </div>
@@ -213,23 +197,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function viewOrderDetails(orderId) {
-        fetch('${pageContext.request.contextPath}/admin/orders/' + orderId)
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('orderDetailsContent').innerHTML = html;
-                new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
-            });
-    }
-
     function updateOrderStatus(orderId) {
         document.getElementById('updateOrderId').value = orderId;
         new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
-    }
-
-    function exportOrders() {
-        window.location.href = '${pageContext.request.contextPath}/admin/orders/export' +
-            window.location.search;
     }
 </script>
 </body>

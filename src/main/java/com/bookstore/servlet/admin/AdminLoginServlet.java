@@ -1,6 +1,7 @@
 package com.bookstore.servlet.admin;
 
 import com.bookstore.dao.AdminDAO;
+import com.bookstore.bean.Admin;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -24,7 +25,22 @@ public class AdminLoginServlet extends HttpServlet {
         if (adminDAO.validateLogin(username, password)) {
             System.out.println("Login successful for user: " + username); // 调试日志
             HttpSession session = request.getSession();
+
+            // 保存用户的登录状态（如果存在）
+            Object userObj = session.getAttribute("user");
+
+            // 设置管理员登录状态
             session.setAttribute("adminUsername", username);
+            Admin admin = adminDAO.findByUsername(username);
+            if (admin != null) {
+                session.setAttribute("admin", admin);
+            }
+
+            // 如果之前有用户登录，恢复用户状态
+            if (userObj != null) {
+                session.setAttribute("user", userObj);
+            }
+
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         } else {
             System.out.println("Login failed for user: " + username); // 调试日志

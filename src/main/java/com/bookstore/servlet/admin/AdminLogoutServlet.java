@@ -16,8 +16,17 @@ public class AdminLogoutServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
+            // 保存用户的登录状态（如果存在）
+            Object userObj = session.getAttribute("user");
+
+            // 清除管理员相关的 session 数据
             session.removeAttribute("adminUsername");
-            session.invalidate();
+            session.removeAttribute("admin");
+
+            // 如果之前有用户登录，恢复用户状态
+            if (userObj != null) {
+                session.setAttribute("user", userObj);
+            }
         }
         response.sendRedirect(request.getContextPath() + "/admin/login");
     }
